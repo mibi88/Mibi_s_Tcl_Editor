@@ -162,7 +162,7 @@ proc run_f {  } {
       tkcon load $filename
     }
   } else {
-    warning "An important warning" "To run a script, save before ;-)."
+    tk_messageBox -icon warning -message "An important warning" "To run a script, save before ;-)." -type ok
   }
 }
 proc consoleshow_w {  } {
