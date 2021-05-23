@@ -127,7 +127,7 @@ proc quit_w {  } {
   }
 }
 proc about_w {  } {
-  set textvar "TextEditor (test) v.0.1.6.1\nby mibi88\nLicense : The Unlicense\nCodename : v11 public\n2021-2021"
+  set textvar "TextEditor (test) v.0.1.6.2\nby mibi88\nLicense : The Unlicense\nCodename : v11 public\n2021-2021"
   toplevel .about
   wm transient .about .
   text .about.info
