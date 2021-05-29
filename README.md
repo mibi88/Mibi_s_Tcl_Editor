@@ -14,4 +14,5 @@ To run Mibi's Tcl Editor, perform these following tasks :
 * Add a copy of Tkcon 2.5 (only the `tkcon.tcl` file) that you can get [here](https://sourceforge.net/projects/tkcon/)
 * Check that `tcllib`'s `ctext` is installed
 * Run `index.tcl`
+
 And you're ready !
