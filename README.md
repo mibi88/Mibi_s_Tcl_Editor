@@ -6,7 +6,11 @@ Mibi's Tcl Editor --- A small IDE to write Tcl code.
 * `Ctext` megawidget (a part of `tklib`)
 * `tkcon` (not as a library : see "Run")
 ## Screenshot
+---
 ![Mibi's Tcl Editor in action !](screenshot.png)
+Screenshot of `v.0.1.6`
+
+---
 ## Run
 To run Mibi's Tcl Editor, perform these following tasks :
 * Clone this repository
