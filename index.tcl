@@ -3,11 +3,9 @@
 package require Tcl 8.6
 package require Tk
 package require ctext
-package require tkcon
 
 set tclfile_path [file dirname [file normalize [info script]]]
 set fontconfig_path "$tclfile_path/font.mibiconfig"
-# puts $tclfile_path
 puts $fontconfig_path
 set font_o [open $fontconfig_path r]
 set font_data [read $font_o]
@@ -39,7 +37,7 @@ proc new_f {  } {
   if { [askabort] == true} {
     global saved
     global filename
-    .mainf.textf.st delete 1.0 end
+    .pan.mainf.textf.st delete 1.0 end
     set saved 1
     set filename "None"
     settitle
@@ -65,8 +63,10 @@ proc open_f {  } {
       set file_o [open $filename r]
       set file_content [read $file_o]
       close $file_o
-      .mainf.textf.st delete 1.0 end
-      .mainf.textf.st insert 1.0 $file_content
+      .pan.mainf.textf.st delete 1.0 end
+      .pan.mainf.textf.st insert 1.0 $file_content
+      update idletasks
+      .pan.mainf.textf.st highlight 1.0 end
     }
   }
 }
@@ -78,7 +78,7 @@ proc save_f {  } {
     set saved 1
     settitle
     set file_o [open $filename w]
-    puts $file_o [.mainf.textf.st get 1.0 end]
+    puts $file_o [.pan.mainf.textf.st get 1.0 end]
     close $file_o
   } else {
     saveas_f
@@ -101,7 +101,7 @@ proc saveas_f {  } {
     set saved 1
     settitle
     set file_o [open $filename w]
-    puts $file_o [.mainf.textf.st get 1.0 end]
+    puts $file_o [.pan.mainf.textf.st get 1.0 end]
     close $file_o
     set saved 1
     settitle
@@ -111,15 +111,15 @@ proc settitle {  } {
   global saved
   global filename
   if {$saved == 1} {
-    wm title . "Mibi's Tcl IDE - $filename"
+    wm title . "Mibi's Tcl Editor - $filename"
   } elseif { $saved == 0 } {
-    wm title . "* Mibi's Tcl IDE - $filename *"
+    wm title . "* Mibi's Tcl Editor - $filename *"
   }
 }
 proc textismodified {  } {
-    global saved
-    set saved 0
-    settitle
+  global saved
+  set saved 0
+  settitle
 }
 proc quit_w {  } {
   if { [askabort] == true} {
@@ -127,7 +127,7 @@ proc quit_w {  } {
   }
 }
 proc about_w {  } {
-  set textvar "TextEditor (test) v.0.1.6.2\nby mibi88\nLicense : The Unlicense\nCodename : v11 public\n2021-2021"
+  set textvar "Mibi's Tcl Editor v.0.2.3\nby mibi88\nLicense : The Unlicense\nCodename : v12\n2021-2021"
   toplevel .about
   wm transient .about .
   text .about.info
@@ -141,8 +141,6 @@ proc settings_w {  } {
   global fontconfig_path
   toplevel .settings
   wm transient .settings .
-  #puts [font names]
-  #puts [font families]
   ttk::combobox .settings.font -values [font families] -state normal
   .settings.font set $font_familly
   spinbox .settings.fontsize -from 9 -to 96
@@ -152,26 +150,51 @@ proc settings_w {  } {
   pack .settings.fontsize
   pack .settings.apply
 }
+proc runinfo {  } {
+  global filename
+  set systemTime [clock seconds]
+  set strinfo [clock format $systemTime -format "== Running $filename | %A %d %B %Y at %I:%M:%S %p ==\n"]
+  puts $strinfo
+  return $strinfo
+}
 proc run_f {  } {
   global saved
   global filename
-  if { $saved == 1 } {
-    if { $filename != "None" } {
-      puts "=== Running file : $filename ==="
-      tkcon show
-      tkcon load $filename
+  global tclfile_path
+  .pan.outf.out insert end [runinfo]
+  .pan.outf.out tag configure errort -foreground red
+    if { $saved == 1 } {
+      if { $filename != "None" } {
+        set cmdstr "wish $filename"
+        set command $cmdstr
+        proc receive {chan} {
+          .pan.outf.out configure -state normal
+          .pan.outf.out insert end [read $chan]
+          .pan.outf.out configure -state disabled
+          .pan.outf.out see end
+          if {[eof $chan]} {
+            close $chan
+          }
+        }
+        set chan [open |[concat $command 2>@1]]
+        fconfigure $chan -blocking 0
+        fileevent $chan readable [list receive $chan]
+      } else {
+        .pan.outf.out insert end "Error : No filename" errort
     }
   } else {
     tk_messageBox -icon warning -message "An important warning" -type ok -detail "To run a script, save before ;-)."
+    .pan.outf.out insert end "Error : Not Saved" errort
   }
 }
 proc consoleshow_w {  } {
-  tkcon show
+  set console [open |[concat "wish tkcon.tcl" 2>@1]]
 }
-proc consolehide_w {  } {
-  tkcon hide
-}
+#proc consolehide_w {  } {
+#    close |$console
+#}
 settitle
+panedwindow .pan -orient vertical -showhandle 1 -sashwidth 3 -sashrelief groove
 menu .mb
 . configure -menu .mb
 menu .mb.file -tearoff 0
@@ -190,33 +213,42 @@ menu .mb.tools -tearoff 0
 .mb.tools add command -label "Run           F5" -command { run_f }
 .mb.file add separator
 .mb.tools add command -label "Show TkCon" -command { consoleshow_w }
-.mb.tools add command -label "Hide TkCon" -command { consolehide_w }
+#.mb.tools add command -label "Hide TkCon" -command { consolehide_w }
 .mb add cascade -label "Tools" -menu .mb.tools
 menu .mb.about -tearoff 0
 .mb.about add command -label "About" -command { about_w }
 .mb add cascade -label "About" -menu .mb.about
 
-frame .mainf
-frame .mainf.textf
-scrollbar .mainf.scroll -command {.mainf.textf.st yview} -orient vertical
-scrollbar .mainf.textf.scrollh -command {.mainf.textf.st xview} -orient horizontal
+frame .pan.mainf
+frame .pan.mainf.textf
+scrollbar .pan.mainf.scroll -command {.pan.mainf.textf.st yview} -orient vertical -width 8
+scrollbar .pan.mainf.textf.scrollh -command {.pan.mainf.textf.st xview} -orient horizontal  -width 8
 font create textboxfont -family $font_familly -size $font_size
-ctext .mainf.textf.st -yscrollcommand {.mainf.scroll set} -xscrollcommand {.mainf.textf.scrollh set} -wrap none -tabs $tabswidth -undo true -font textboxfont
-pack .mainf -fill both -expand yes
-pack .mainf.textf -fill both -expand yes -side left
-pack .mainf.textf.st -fill both -expand yes
-pack .mainf.scroll -fill y -side left
-pack .mainf.textf.scrollh -fill x
+ctext .pan.mainf.textf.st -yscrollcommand {.pan.mainf.scroll set} -xscrollcommand {.pan.mainf.textf.scrollh set} -wrap none -tabs $tabswidth -undo true -font textboxfont
+pack .pan.mainf.textf -fill both -expand yes -side left
+pack .pan.mainf.textf.st -fill both -expand yes
+pack .pan.mainf.scroll -fill y -side left
+pack .pan.mainf.textf.scrollh -fill x
 # syntax hightlighting
-::ctext::addHighlightClass .mainf.textf.st tclkeywords blue [list set info interp uplevel global upvar if elseif else proc text button label entry package puts toplevel frame canvas return for while switch case lappend unset variable foreach namespace for incr list regsub close expr foreach llengthappend concat format load return array gets lrange proc switchfile glob lappend lreplace putsbreak global lsearch set catch eval lindex lsort while exec if linsert open regexp source clock exit package split unknown after info pid rename string unset fblocked interp pkg_mkIndex subst update continue fconfigure join scan uplevel bgerror eof seek tclvars upvar error fileevent library pwd tell vwait filename history read socket time cd flush trace
-]
-::ctext::addHighlightClass .mainf.textf.st modulenames purple [list Tk TclOO Tcl ctext autoscroll canvas chatwidget crosshair cursor datefield Diagrams getstring tklib_history ico ipentry khim ntext plotchart style swaplist tablelist tkpiechart tooltip widget]
-::ctext::addHighlightClass .mainf.textf.st kwglobal red [list require provide tearoff]
-::ctext::addHighlightClassWithOnlyCharStart .mainf.textf.st args brown \-
-::ctext::addHighlightClassWithOnlyCharStart .mainf.textf.st vars green \$
-::ctext::addHighlightClassWithOnlyCharStart .mainf.textf.st comments gray \#
+::ctext::addHighlightClass .pan.mainf.textf.st tclkeywords blue [list set info interp uplevel global upvar if elseif else proc text button label entry package puts toplevel frame canvas return for while switch case lappend unset variable foreach namespace for incr list regsub close expr foreach llengthappend concat format load return array gets lrange proc switchfile glob lappend lreplace putsbreak global lsearch set catch eval lindex lsort while exec if linsert open regexp source clock exit package split unknown after info pid rename string unset fblocked interp pkg_mkIndex subst update continue fconfigure join scan uplevel bgerror eof seek tclvars upvar error fileevent library pwd tell vwait filename history read socket time cd flush trace]
+::ctext::addHighlightClass .pan.mainf.textf.st modulenames purple [list Tk TclOO Tcl ctext autoscroll canvas chatwidget crosshair cursor datefield Diagrams getstring tklib_history ico ipentry khim ntext plotchart style swaplist tablelist tkpiechart tooltip widget]
+::ctext::addHighlightClass .pan.mainf.textf.st kwglobal red [list require provide tearoff]
+::ctext::addHighlightClassWithOnlyCharStart .pan.mainf.textf.st args brown \-
+::ctext::addHighlightClassWithOnlyCharStart .pan.mainf.textf.st vars green \$
+::ctext::addHighlightClassForRegexp .pan.mainf.textf.st comments gray {#[^\n\r]*}
+::ctext::addHighlightClassForSpecialChars .pan.mainf.textf.st brackets darkblue {[]{}}
+::ctext::addHighlightClassForSpecialChars .pan.mainf.textf.st quotes darkgreen {"'}
+::ctext::addHighlightClassForSpecialChars .pan.mainf.textf.st math darkred {+=*-/&^%!|<> 0 1 2 3 4 5 6 7 8 9 .}
+frame .pan.outf
+text .pan.outf.out -wrap word  -tabs $tabswidth -state disabled -yscrollcommand { .pan.outf.outscroll set }
+scrollbar .pan.outf.outscroll -orient vertical -command { .pan.outf.out yview } -width 8
+.pan add .pan.mainf
+.pan add .pan.outf
+pack .pan -fill both -expand true
+pack .pan.outf.out -expand true -fill both -side left
+pack .pan.outf.outscroll -fill y -side left
 #=====================
-bind .mainf.textf.st <<Modified>> {  textismodified  }
+bind .pan.mainf.textf.st <<Modified>> {  textismodified  }
 bind . <Control-s> {  save_f  }
 bind . <Control-S> {  saveas_f  }
 bind . <Control-o> {  open_f  }
@@ -225,3 +257,6 @@ bind . <Control-q> {  quit_w  }
 bind . <F5> {  run_f  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
+
+
+
