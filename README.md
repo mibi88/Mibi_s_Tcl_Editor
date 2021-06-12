@@ -10,6 +10,9 @@ Mibi's Tcl Editor --- A small IDE to write Tcl code.
 ![Mibi's Tcl Editor in action !](screenshot.png)
 Screenshot of `v.0.1.6`
 
+![Mibi's Tcl Editor in action !](screenshot2.png)
+Screenshot of `v.0.3`
+
 ---
 ## Run
 To run Mibi's Tcl Editor, perform these following tasks :
