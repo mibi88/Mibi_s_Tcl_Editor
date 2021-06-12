@@ -13,7 +13,7 @@ set font_data_list [split $font_data "\n"]
 set font_familly [lindex $font_data_list 0]
 set font_size [lindex $font_data_list 1]
 set tabswidth 4
-
+set chan "none"
 set filename "None"
 set saved 1
 proc askabort {  } {
@@ -127,7 +127,7 @@ proc quit_w {  } {
   }
 }
 proc about_w {  } {
-  set textvar "Mibi's Tcl Editor v.0.2.3\nby mibi88\nLicense : The Unlicense\nCodename : v12\n2021-2021"
+  set textvar "Mibi's Tcl Editor v.0.3\nby mibi88\nLicense : GNU GPL v2 or later\nCodename : v13\n2021-2021"
   toplevel .about
   wm transient .about .
   text .about.info
@@ -161,8 +161,11 @@ proc run_f {  } {
   global saved
   global filename
   global tclfile_path
+  global chan
+  .pan.outf.out configure -state normal
   .pan.outf.out insert end [runinfo]
   .pan.outf.out tag configure errort -foreground red
+  .pan.outf.out configure -state disabled
     if { $saved == 1 } {
       if { $filename != "None" } {
         set cmdstr "wish $filename"
@@ -176,15 +179,19 @@ proc run_f {  } {
             close $chan
           }
         }
-        set chan [open |[concat $command 2>@1]]
+        set chan [open |[concat $command 2>@1] a+]
         fconfigure $chan -blocking 0
         fileevent $chan readable [list receive $chan]
       } else {
+        .pan.outf.out configure -state normal
         .pan.outf.out insert end "Error : No filename" errort
+        .pan.outf.out configure -state disabled
     }
   } else {
     tk_messageBox -icon warning -message "An important warning" -type ok -detail "To run a script, save before ;-)."
+    .pan.outf.out configure -state normal
     .pan.outf.out insert end "Error : Not Saved" errort
+    .pan.outf.out configure -state disabled
   }
 }
 proc consoleshow_w {  } {
@@ -247,6 +254,13 @@ scrollbar .pan.outf.outscroll -orient vertical -command { .pan.outf.out yview } 
 pack .pan -fill both -expand true
 pack .pan.outf.out -expand true -fill both -side left
 pack .pan.outf.outscroll -fill y -side left
+frame .pan.input
+entry .pan.input.entry
+button .pan.input.enterb -text ">>>" -command { if { $chan != "none"} { puts $chan [.pan.input.entry get] ;}; flush $chan; .pan.outf.out configure -state normal; .pan.outf.out insert end [gets $chan]; .pan.outf.out configure -state disabled }
+pack .pan.input.entry -fill x -side left
+pack .pan.input.enterb -side left
+.pan add .pan.input
+
 #=====================
 bind .pan.mainf.textf.st <<Modified>> {  textismodified  }
 bind . <Control-s> {  save_f  }
@@ -257,6 +271,3 @@ bind . <Control-q> {  quit_w  }
 bind . <F5> {  run_f  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
-
-
-
