@@ -1,7 +1,7 @@
 #!/usr/bin/wish
 
-package require Tcl 8.6
-package require Tk
+package require Tcl 8.5
+package require Tk 8.5
 package require ctext
 
 set tclfile_path [file dirname [file normalize [info script]]]
