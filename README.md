@@ -1,8 +1,8 @@
 # Mibi's Tcl Editor
 Mibi's Tcl Editor --- A small IDE to write Tcl code.
 ## Require :
-* `Tcl 8.6` (tested under Tcl 8.6.10)
-* `Tk` (tested under Tk 8.6.10)
+* `Tcl 8.5` at least (tested under Tcl 8.6.10)
+* `Tk 8.5` at least (tested under Tk 8.6.10)
 * `Ctext` megawidget (a part of `tklib`)
 * `tkcon` (not as a library : see "Run")
 ## Screenshot
