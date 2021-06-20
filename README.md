@@ -7,11 +7,14 @@ Mibi's Tcl Editor --- A small IDE to write Tcl code.
 * `tkcon` (not as a library : see "Run")
 ## Screenshot
 ---
-![Mibi's Tcl Editor in action !](screenshot.png)
+![Mibi's Tcl Editor in action ! (v.0.1.6)](screenshot.png)
 Screenshot of `v.0.1.6`
 
-![Mibi's Tcl Editor in action !](screenshot2.png)
+![Mibi's Tcl Editor in action ! (v.0.3)](screenshot2.png)
 Screenshot of `v.0.3`
+
+![Mibi's Tcl Editor in action ! (v.0.4)](screenshot3.png)
+Screenshot of `v.0.4`
 
 ---
 ## Run
@@ -19,7 +22,7 @@ To run Mibi's Tcl Editor, perform these following tasks :
 * Clone this repository
 * If Tcl 8.6 and Tk 8 are not installed, install these softwares.
 * Add a copy of Tkcon 2.5 (only the `tkcon.tcl` file) that you can get [here](https://sourceforge.net/projects/tkcon/)
-* Check that `tcllib`'s `ctext` is installed
+* Check that `tklib`'s `ctext` is installed
 * Run `index.tcl`
 
 And you're ready !
