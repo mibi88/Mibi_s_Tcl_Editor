@@ -1,6 +1,12 @@
 # Mibi's Tcl Editor
 Mibi's Tcl Editor --- A small IDE to write Tcl code.
+
+---
+
 **Mibi's Tcl Editor's 6 months : v11 public ➡️ v15**
+
+---
+
 ## Require :
 * `Tcl 8.6` at least (tested under Tcl 8.6.10)
 * `Tk 8.6` at least (tested under Tk 8.6.10)
