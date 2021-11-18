@@ -1,8 +1,21 @@
 #!/usr/bin/wish
 
+######################################
+## Mibi's Tcl Editor                ##
+## by Mibi88                        ##
+## v.0.5                            ##
+## -------------------------------- ##
+## A small Tcl IDE                  ##
+## -------------------------------- ##
+## Requirements :                   ##
+## o Tcl 8.6                        ##
+## o Tk  8.6                        ##
+## o ctext 3.2                      ##
+######################################
+
 package require Tcl 8.6
 package require Tk 8.6
-package require ctext
+package require ctext 3.2
 
 set tclfile_path [file dirname [file normalize [info script]]]
 set fontconfig_path "$tclfile_path/font.mibiconfig"
@@ -15,6 +28,21 @@ set font_family [lindex $font_data_list 0]
 set font_size [lindex $font_data_list 1]
 set file_tabswidth [lindex $font_data_list 2]
 set tabswidth "{ $file_tabswidth c numeric 1c }"
+########### MAIN CONFIG START ##############
+set mainconfig_path "$tclfile_path/config.mibiconfig"
+set mainconfig_o [open $mainconfig_path r]
+set mainconfig_data [read $mainconfig_o]
+set mainconfig_data_list [split $mainconfig_data "\n"]
+set lang [lindex $mainconfig_data_list 0]
+set config_lenght [llength $mainconfig_data_list]
+#for {set i 1} {$i < $config_lenght} {incr i} {
+#    set langdata [lindex $mainconfig_data_list $i]
+#    set langdata_list [split $langdata " "]
+#    set langname [lindex $langdata_list 0]
+#    set langdir [lindex $langdata_list 0]
+set langs [glob -directory "$tclfile_path/langs" -type d *]
+puts $langs
+########### MAIN CONFIG END ################
 set cmdconfig_path "$tclfile_path/tclconf.mibiconfig"
 set cmd_o [open $cmdconfig_path r]
 set cmd_data [read $cmd_o]
@@ -26,6 +54,7 @@ set chan "none"
 set filename "None"
 set saved 1
 set index 1.0
+######################################################################## FUNCTIONS START ###########################################################################
 proc askabort {  } {
   global saved
   if { $saved == 0 } {
@@ -142,7 +171,7 @@ proc about_w {  } {
   set os_t $tcl_platform(os)
   set osv $tcl_platform(osVersion)
   set processor $tcl_platform(machine)
-  set textvar "Mibi's Tcl Editor v.0.4\nby mibi88\nLicense : GNU GPL v2 or later\nCodename : v14\n2021-2021\n\nTcl version : $tclv\nOperating system : $os_t $osv\nProcessor : $processor"
+  set textvar "Mibi's Tcl Editor v.0.5\nby mibi88\nLicense : GNU GPL v2 or later\nCodename : v15\n2021-2021\n\nTcl version : $tclv\nOperating system : $os_t $osv\nProcessor : $processor"
   toplevel .about
   wm transient .about .
   text .about.info
@@ -301,6 +330,7 @@ proc paste_t {  } {
     .pan.mainf.textf.st insert $position [clipboard get]
   }
 }
+######################################################################## FUNCTIONS END #############################################################################
 settitle
 panedwindow .pan -orient vertical -showhandle 1 -sashwidth 3 -sashrelief groove
 menu .mb
@@ -349,18 +379,9 @@ pack .pan.mainf.textf.st -fill both -expand yes
 pack .pan.mainf.scroll -fill y -side left
 pack .pan.mainf.textf.scrollh -fill x
 # syntax hightlighting
-::ctext::addHighlightClass .pan.mainf.textf.st tclkeywords blue [list set info interp uplevel global upvar if elseif else proc text button label entry package puts toplevel frame canvas return for while switch case lappend unset variable foreach namespace for incr list regsub close expr foreach llengthappend concat format load return array gets lrange proc switchfile glob lappend lreplace putsbreak global lsearch set catch eval lindex lsort while exec if linsert open regexp source clock exit package split unknown after info pid rename string unset fblocked interp pkg_mkIndex subst update continue fconfigure join scan uplevel bgerror eof seek tclvars upvar error fileevent library pwd tell vwait filename history read socket time cd flush trace pack insert delete get grid place search]
-::ctext::addHighlightClass .pan.mainf.textf.st modulenames purple [list Tk TclOO Tcl ctext autoscroll canvas chatwidget crosshair cursor datefield Diagrams getstring tklib_history ico ipentry khim ntext plotchart style swaplist tablelist tkpiechart tooltip widget]
-::ctext::addHighlightClass .pan.mainf.textf.st kwglobal red [list require provide tearoff]
-::ctext::addHighlightClassWithOnlyCharStart .pan.mainf.textf.st args brown \-
-::ctext::addHighlightClassWithOnlyCharStart .pan.mainf.textf.st vars green \$
-::ctext::addHighlightClassForRegexp .pan.mainf.textf.st comments gray {#[^\n\r]*}
-::ctext::addHighlightClassForSpecialChars .pan.mainf.textf.st brackets darkblue {[]{}}
-::ctext::addHighlightClassForRegexp .pan.mainf.textf.st aquotes darkgreen {"(\\"|[^"])*"}
-::ctext::addHighlightClassForRegexp .pan.mainf.textf.st bquotes darkgreen {'(\\'|[^'])*'}
-::ctext::addHighlightClassForSpecialChars .pan.mainf.textf.st math darkred {+=*-/&^%!|<> 0 1 2 3 4 5 6 7 8 9 .}
-::ctext::addHighlightClass .pan.mainf.textf.st bools darkred [list true false]
-::ctext::addHighlightClassForRegexp .pan.mainf.textf.st class darkblue {::}
+
+####
+
 frame .pan.outf
 text .pan.outf.out -wrap word  -tabs $tabswidth -state disabled -yscrollcommand { .pan.outf.outscroll set }
 scrollbar .pan.outf.outscroll -orient vertical -command { .pan.outf.out yview } -width 8
@@ -388,3 +409,5 @@ bind . <Control-f> {  search  }
 bind . <Control-h> {  replace  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
+
+
