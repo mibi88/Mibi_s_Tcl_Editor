@@ -2,7 +2,8 @@
 Mibi's Tcl Editor --- A small IDE to write Tcl code.
 
 ![Mibi's Tcl Editor in action ! (v.0.1.6)](logo.svg)
-Logo license : CC-BY-NC-SA 4.0
+
+**Logo license : CC-BY-NC-SA 4.0**
 
 ---
 
