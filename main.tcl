@@ -18,7 +18,7 @@ package require Tk 8.6
 package require ctext 3.2
 
 set tclfile_path [file dirname [file normalize [info script]]]
-set fontconfig_path "$tclfile_path/font.mibiconfig"
+set fontconfig_path "$tclfile_path/data/font.mibiconfig"
 puts $fontconfig_path
 set font_o [open $fontconfig_path r]
 set font_data [read $font_o]
@@ -29,26 +29,42 @@ set font_size [lindex $font_data_list 1]
 set file_tabswidth [lindex $font_data_list 2]
 set tabswidth "{ $file_tabswidth c numeric 1c }"
 ########### MAIN CONFIG START ##############
-set mainconfig_path "$tclfile_path/config.mibiconfig"
+set mainconfig_path "$tclfile_path/data/config.mibiconfig"
 set mainconfig_o [open $mainconfig_path r]
 set mainconfig_data [read $mainconfig_o]
 set mainconfig_data_list [split $mainconfig_data "\n"]
 set lang [lindex $mainconfig_data_list 0]
 set config_lenght [llength $mainconfig_data_list]
 #for {set i 1} {$i < $config_lenght} {incr i} {
-#    set langdata [lindex $mainconfig_data_list $i]
-#    set langdata_list [split $langdata " "]
-#    set langname [lindex $langdata_list 0]
-#    set langdir [lindex $langdata_list 0]
+#  set langdata [lindex $mainconfig_data_list $i]
+#  set langdata_list [split $langdata " "]
+#  set langname [lindex $langdata_list 0]
+#  set langdir [lindex $langdata_list 0]
 set langs [glob -directory "$tclfile_path/langs" -type d *]
-puts $langs
+#puts $langs
+puts "LANGS"
+set cmdconfig_path ""
+set langs_data ""
+foreach i $langs {
+  set lang_o [open "$i/langconf.mibiconfig"]
+  set langconf [read $lang_o]
+  set langconf_list [split $langconf "\n"]
+  set langname [lindex $langconf_list 0]
+  puts "$langname : $i"
+  if {$langname == $lang} {
+    set cmdconfig_path "$i/langconf.mibiconfig"
+  }
+  set lang_data [concat $langname $i]
+  lappend $lang_data $langs_data
+}
+puts "LANGS DATA"
+puts $langs_data
 ########### MAIN CONFIG END ################
-set cmdconfig_path "$tclfile_path/tclconf.mibiconfig"
 set cmd_o [open $cmdconfig_path r]
 set cmd_data [read $cmd_o]
 set cmd_data_list [split $cmd_data "\n"]
-set cmd [lindex $cmd_data_list 0]
-set tclsh_cmd [lindex $cmd_data_list 1]
+set cmd [lindex $cmd_data_list 1]
+set tclsh_cmd [lindex $cmd_data_list 2]
 close $cmd_o
 set chan "none"
 set filename "None"
@@ -409,5 +425,9 @@ bind . <Control-f> {  search  }
 bind . <Control-h> {  replace  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
+
+
+
+
 
 
