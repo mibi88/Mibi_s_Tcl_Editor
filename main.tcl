@@ -44,7 +44,9 @@ set langs [glob -directory "$tclfile_path/langs" -type d *]
 #puts $langs
 puts "LANGS"
 set cmdconfig_path ""
-set langs_data ""
+set langpath ""
+set langs_names {}
+set langs_path {}
 foreach i $langs {
   set lang_o [open "$i/langconf.mibiconfig"]
   set langconf [read $lang_o]
@@ -53,16 +55,19 @@ foreach i $langs {
   puts "$langname : $i"
   if {$langname == $lang} {
     set cmdconfig_path "$i/langconf.mibiconfig"
+    set langpath $i
   }
-  set lang_data [concat $langname $i]
-  lappend $lang_data $langs_data
+  set langs_names [concat $langs_names $langname]
+  set langs_path [concat $langs_path $i]
 }
 puts "LANGS DATA"
-puts $langs_data
+puts $langs_names
+puts $langs_path
 ########### MAIN CONFIG END ################
 set cmd_o [open $cmdconfig_path r]
 set cmd_data [read $cmd_o]
 set cmd_data_list [split $cmd_data "\n"]
+set language [lindex $cmd_data_list 0]
 set cmd [lindex $cmd_data_list 1]
 set tclsh_cmd [lindex $cmd_data_list 2]
 close $cmd_o
@@ -204,6 +209,10 @@ proc settings_w {  } {
   global cmd
   global tclsh_cmd
   global .pan.mainf.textf
+  global language
+  global langs_names
+  global langs_path
+  global langpath
   toplevel .settings
   wm transient .settings .
   wm title .settings "Settings"
@@ -216,6 +225,25 @@ proc settings_w {  } {
   label .settings.tabw_i -text "Tab width (c) :"
   spinbox .settings.tabw -from 1 -to 12 -state readonly
   .settings.tabw set $file_tabswidth
+  label .settings.lang_i -text "Programming language :"
+  ttk::combobox .settings.lang -values $langs_names -state readonly
+  bind .settings.lang <<ComboboxSelected>> { 
+    set language [.settings.lang get]
+    set langnum [lsearch $langs_names $language]
+    set lang_path [lindex $langs_path $langnum]
+    set cmdconfig_path "$lang_path/langconf.mibiconfig"
+    set cmd_o [open $cmdconfig_path r]
+    set cmd_data [read $cmd_o]
+    set cmd_data_list [split $cmd_data "\n"]
+    set language [lindex $cmd_data_list 0]
+    set cmd [lindex $cmd_data_list 1]
+    set tclsh_cmd [lindex $cmd_data_list 2]
+    close $cmd_o
+    .settings.cmd delete 0 end
+    .settings.cmd insert 0 $cmd
+    .settings.cmd_tclsh delete 0 end
+    .settings.cmd_tclsh insert 0 $tclsh_cmd }
+  .settings.lang set $language
   label .settings.cmd_i -text "Run command\n(\"<f>\" will be\nreplaced with the\nname of the file\nto run) :"
   entry .settings.cmd
   label .settings.cmd_tclsh_i -text "Console command :"
@@ -224,13 +252,43 @@ proc settings_w {  } {
   .settings.cmd insert 0 $cmd
   .settings.cmd_tclsh delete 0 end
   .settings.cmd_tclsh insert 0 $tclsh_cmd
-  button .settings.apply -text "Apply" -command { set font_size [.settings.fontsize get]; set font_family [.settings.font get]; set file_tabswidth [.settings.tabw get]; set tabswidth "{ $file_tabswidth c numeric 1c }"; set cmd [.settings.cmd get]; set tclsh_cmd [.settings.cmd_tclsh get]; set font_o [open $fontconfig_path w]; puts $font_o $font_family; puts $font_o $font_size; puts $font_o $file_tabswidth; close $font_o; font configure textboxfont -family $font_family -size $font_size; .pan.mainf.textf.st configure -tabs $tabswidth; set cmd_o [open $cmdconfig_path w]; puts $cmd_o $cmd; puts $cmd_o $tclsh_cmd; close $cmd_o }
+  button .settings.apply -text "Apply" -command { set font_size [.settings.fontsize get]
+    set font_family [.settings.font get]
+    set file_tabswidth [.settings.tabw get]
+    set tabswidth "{ $file_tabswidth c numeric 1c }"
+    set cmd [.settings.cmd get]
+    set tclsh_cmd [.settings.cmd_tclsh get]
+    set font_o [open $fontconfig_path w]
+    set language [.settings.lang get]
+    set langnum [lsearch $langs_names $language]
+    set langpath [lindex $langs_path $langnum]
+    set cmdconfig_path "$lang_path/langconf.mibiconfig"
+    puts $font_o $font_family
+    puts $font_o $font_size
+    puts $font_o $file_tabswidth
+    close $font_o
+    font configure textboxfont -family $font_family -size $font_size
+    .pan.mainf.textf.st configure -tabs $tabswidth
+    set mainconfig_o [open $mainconfig_path w]
+    puts $mainconfig_o $language
+    close $mainconfig_o
+    set cmd_o [open $cmdconfig_path w]
+    puts $cmd_o $language
+    puts $cmd_o $cmd
+    puts $cmd_o $tclsh_cmd
+    close $cmd_o
+    removehighlight
+    highlight
+    update idletasks
+    .pan.mainf.textf.st highlight 1.0 end }
   pack .settings.font_i
   pack .settings.font
   pack .settings.fontsize_i
   pack .settings.fontsize
   pack .settings.tabw_i
   pack .settings.tabw
+  pack .settings.lang_i
+  pack .settings.lang
   pack .settings.cmd_i
   pack .settings.cmd
   pack .settings.cmd_tclsh_i
@@ -297,7 +355,12 @@ proc replace {  } {
   entry .replace.orgstr
   label .replace.newstr_i -text "With :"
   entry .replace.newstr
-  button .replace.replaceb -text "Replace next" -command { set org [.replace.orgstr get]; set new [.replace.newstr get]; set text [.pan.mainf.textf.st get 1.0 end]; set text_a [regsub $org $text $new]; .pan.mainf.textf.st delete 1.0 end; .pan.mainf.textf.st insert end $text_a }
+  button .replace.replaceb -text "Replace next" -command { set org [.replace.orgstr get]
+    set new [.replace.newstr get]
+    set text [.pan.mainf.textf.st get 1.0 end]
+    set text_a [regsub $org $text $new]
+    .pan.mainf.textf.st delete 1.0 end
+    .pan.mainf.textf.st insert end $text_a }
   pack .replace.orgstr_i
   pack .replace.orgstr
   pack .replace.newstr_i
@@ -313,7 +376,12 @@ proc search {  } {
   wm title .search "Search"
   label .search.str_i -text "To search :"
   entry .search.str
-  button .search.searchb -text "Find next\n(click more than\none time to highlight\nalso the next word)" -command { puts $index; set str [.search.str get]; set position [.pan.mainf.textf.st  search -count n -- $str $index+2c]; set index $position+${n}c; .pan.mainf.textf.st tag add thing $position $position+${n}c; .pan.mainf.textf.st tag configure thing -background yellow }
+  button .search.searchb -text "Find next\n(click more than\none time to highlight\nalso the next word)" -command { puts $index
+    set str [.search.str get]
+    set position [.pan.mainf.textf.st  search -count n -- $str $index+2c]
+    set index $position+${n}c
+    .pan.mainf.textf.st tag add thing $position $position+${n}c
+    .pan.mainf.textf.st tag configure thing -background yellow }
   pack .search.str_i
   pack .search.str
   pack .search.searchb
@@ -345,6 +413,18 @@ proc paste_t {  } {
     set position [.pan.mainf.textf.st index insert]
     .pan.mainf.textf.st insert $position [clipboard get]
   }
+}
+####### SYNTAX HIGHLIGHTING #######
+proc removehighlight {  } {
+  set highlightclasses [::ctext::getHighlightClasses .pan.mainf.textf.st]
+  puts $highlightclasses
+  ::ctext::clearHighlightClasses .pan.mainf.textf.st
+}
+proc highlight {  } {
+  global langpath
+  set highlight_o [open "$langpath/highlight.tcl" "r"]
+  set highlight_script [read $highlight_o]
+  eval $highlight_script
 }
 ######################################################################## FUNCTIONS END #############################################################################
 settitle
@@ -395,7 +475,7 @@ pack .pan.mainf.textf.st -fill both -expand yes
 pack .pan.mainf.scroll -fill y -side left
 pack .pan.mainf.textf.scrollh -fill x
 # syntax hightlighting
-
+highlight
 ####
 
 frame .pan.outf
@@ -408,7 +488,13 @@ pack .pan.outf.out -expand true -fill both -side left
 pack .pan.outf.outscroll -fill y -side left
 frame .pan.input
 entry .pan.input.entry
-button .pan.input.enterb -text ">>>" -command { if { $chan != "none"} { puts $chan [.pan.input.entry get] ;}; flush $chan; .pan.outf.out configure -state normal; .pan.outf.out insert end [gets $chan]; .pan.outf.out configure -state disabled }
+button .pan.input.enterb -text ">>>" -command { if { $chan != "none"} {
+    puts $chan [.pan.input.entry get]
+  }
+  flush $chan
+  .pan.outf.out configure -state normal
+  .pan.outf.out insert end [gets $chan]
+  .pan.outf.out configure -state disabled }
 pack .pan.input.entry -fill x -side left
 pack .pan.input.enterb -side left
 .pan add .pan.input
@@ -425,9 +511,4 @@ bind . <Control-f> {  search  }
 bind . <Control-h> {  replace  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
-
-
-
-
-
 
