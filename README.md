@@ -27,6 +27,9 @@ Screenshot of `v.0.3`
 ![Mibi's Tcl Editor in action ! (v.0.4)](screenshot3.png)
 Screenshot of `v.0.4`
 
+![Mibi's Tcl Editor in action ! (v.0.4)](screenshot4.png)
+Screenshot of `v.0.5b1`
+
 ---
 ## Run
 To run Mibi's Tcl Editor, perform these following tasks :
