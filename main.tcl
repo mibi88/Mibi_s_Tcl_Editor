@@ -17,64 +17,110 @@ package require Tcl 8.6
 package require Tk 8.6
 package require ctext 3.2
 
-set tclfile_path [file dirname [file normalize [info script]]]
-set fontconfig_path "$tclfile_path/data/font.mibiconfig"
-puts $fontconfig_path
-set font_o [open $fontconfig_path r]
-set font_data [read $font_o]
-close $font_o
-set font_data_list [split $font_data "\n"]
-set font_family [lindex $font_data_list 0]
-set font_size [lindex $font_data_list 1]
-set file_tabswidth [lindex $font_data_list 2]
-set tabswidth "{ $file_tabswidth c numeric 1c }"
-########### MAIN CONFIG START ##############
-set mainconfig_path "$tclfile_path/data/config.mibiconfig"
-set mainconfig_o [open $mainconfig_path r]
-set mainconfig_data [read $mainconfig_o]
-set mainconfig_data_list [split $mainconfig_data "\n"]
-set lang [lindex $mainconfig_data_list 0]
-set config_lenght [llength $mainconfig_data_list]
-#for {set i 1} {$i < $config_lenght} {incr i} {
-#  set langdata [lindex $mainconfig_data_list $i]
-#  set langdata_list [split $langdata " "]
-#  set langname [lindex $langdata_list 0]
-#  set langdir [lindex $langdata_list 0]
-set langs [glob -directory "$tclfile_path/langs" -type d *]
-#puts $langs
-puts "LANGS"
-set cmdconfig_path ""
-set langpath ""
-set langs_names {}
-set langs_path {}
-foreach i $langs {
-  set lang_o [open "$i/langconf.mibiconfig"]
-  set langconf [read $lang_o]
-  set langconf_list [split $langconf "\n"]
-  set langname [lindex $langconf_list 0]
-  puts "$langname : $i"
-  if {$langname == $lang} {
-    set cmdconfig_path "$i/langconf.mibiconfig"
-    set langpath $i
+proc loadconfig {  } {
+  global tclfile_path
+  global fontconfig_path
+  global font_o
+  global font_data
+  global font_data_list
+  global font_family
+  global font_size
+  global file_tabswidth
+  global tabswidth
+  global mainconfig_path
+  global mainconfig_o
+  global mainconfig_data
+  global mainconfig_data_list
+  global lang
+  global config_lenght
+  global langs
+  global cmdconfig_path
+  global langpath
+  global lang_path
+  global langs_names
+  global langs_path
+  global lang_o
+  global langconf
+  global langconf_list
+  global langname
+  global cmdconfig_path
+  global cmd_o
+  global cmd_data
+  global cmd_data_list
+  global language
+  global cmd
+  global tclsh_cmd
+  global chan
+  global filename
+  global saved
+  global index
+  set tclfile_path [file dirname [file normalize [info script]]]
+  set fontconfig_path "$tclfile_path/data/font.mibiconfig"
+  puts $fontconfig_path
+  set font_o [open $fontconfig_path r]
+  set font_data [read $font_o]
+  close $font_o
+  puts "Font config : $font_data at $fontconfig_path"
+  set font_data_list [split $font_data "\n"]
+  set font_family [lindex $font_data_list 0]
+  set font_size [lindex $font_data_list 1]
+  set file_tabswidth [lindex $font_data_list 2]
+  set tabswidth "{ $file_tabswidth c numeric 1c }"
+  ########### MAIN CONFIG START ##############
+  set mainconfig_path "$tclfile_path/data/config.mibiconfig"
+  set mainconfig_o [open $mainconfig_path r]
+  set mainconfig_data [read $mainconfig_o]
+  close $mainconfig_o
+  set mainconfig_data_list [split $mainconfig_data "\n"]
+  set lang [lindex $mainconfig_data_list 0]
+  set config_lenght [llength $mainconfig_data_list]
+  #for {set i 1} {$i < $config_lenght} {incr i} {
+  #  set langdata [lindex $mainconfig_data_list $i]
+  #  set langdata_list [split $langdata " "]
+  #  set langname [lindex $langdata_list 0]
+  #  set langdir [lindex $langdata_list 0]
+  # }
+  set langs [glob -directory "$tclfile_path/langs" -type d *]
+  #puts $langs
+  puts "LANGS"
+  set cmdconfig_path ""
+  set langpath ""
+  set langs_names {}
+  set langs_path {}
+  foreach i $langs {
+    set lang_o [open "$i/langconf.mibiconfig"]
+    set langconf [read $lang_o]
+    close $lang_o
+    set langconf_list [split $langconf "\n"]
+    set langname [lindex $langconf_list 0]
+    puts "$langname : $i"
+    if {$langname == $lang} {
+      set cmdconfig_path "$i/langconf.mibiconfig"
+      set langpath $i
+    }
+    set langs_names [concat $langs_names $langname]
+    set langs_path [concat $langs_path $i]
   }
-  set langs_names [concat $langs_names $langname]
-  set langs_path [concat $langs_path $i]
+  puts "LANGS DATA"
+  puts $langs_names
+  puts $langs_path
+  ########### MAIN CONFIG END ################
+  set cmd_o [open $cmdconfig_path r]
+  set cmd_data [read $cmd_o]
+  set cmd_data_list [split $cmd_data "\n"]
+  set language [lindex $cmd_data_list 0]
+  set cmd [lindex $cmd_data_list 1]
+  set tclsh_cmd [lindex $cmd_data_list 2]
+  close $cmd_o
+  set chan "none"
+  set filename "None"
+  set saved 1
+  set index 1.0
+  puts $font_family
+  puts $font_size
+  puts $file_tabswidth
 }
-puts "LANGS DATA"
-puts $langs_names
-puts $langs_path
-########### MAIN CONFIG END ################
-set cmd_o [open $cmdconfig_path r]
-set cmd_data [read $cmd_o]
-set cmd_data_list [split $cmd_data "\n"]
-set language [lindex $cmd_data_list 0]
-set cmd [lindex $cmd_data_list 1]
-set tclsh_cmd [lindex $cmd_data_list 2]
-close $cmd_o
-set chan "none"
-set filename "None"
-set saved 1
-set index 1.0
+loadconfig
 ######################################################################## FUNCTIONS START ###########################################################################
 proc askabort {  } {
   global saved
@@ -116,8 +162,9 @@ proc open_f {  } {
     {{All Files}        *             }
   }
   if { [askabort] == true} {
-    set filename [tk_getOpenFile -filetypes $filetypes]
-    if { $filename != "" } {
+    set temp_filename [tk_getOpenFile -filetypes $filetypes]
+    if { $temp_filename != "" } {
+      set filename $temp_filename
       set saved 1
       settitle
       set file_o [open $filename r]
@@ -147,6 +194,7 @@ proc save_f {  } {
 proc saveas_f {  } {
   puts "Save as"
   global filename
+  global saved
   set filetypes {
     {{TCL Scripts}      {.tcl}        }
     {{Python Scripts}   {.py}         }
@@ -154,10 +202,9 @@ proc saveas_f {  } {
     {{Text Files}       {.txt}        }
     {{All Files}        *             }
   }
-  set filename [tk_getSaveFile -filetypes $filetypes -confirmoverwrite true]
-  global filename
-  global saved
-  if { $filename != "" } {
+  set temp_filename [tk_getSaveFile -filetypes $filetypes -confirmoverwrite true]
+  if { $temp_filename != "" } {
+    set filename $temp_filename
     set saved 1
     settitle
     set file_o [open $filename w]
@@ -212,7 +259,9 @@ proc settings_w {  } {
   global language
   global langs_names
   global langs_path
+  global lang_names
   global langpath
+  set lang_path $langpath
   toplevel .settings
   wm transient .settings .
   wm title .settings "Settings"
@@ -227,7 +276,7 @@ proc settings_w {  } {
   .settings.tabw set $file_tabswidth
   label .settings.lang_i -text "Programming language :"
   ttk::combobox .settings.lang -values $langs_names -state readonly
-  bind .settings.lang <<ComboboxSelected>> { 
+  bind .settings.lang <<ComboboxSelected>> {
     set language [.settings.lang get]
     set langnum [lsearch $langs_names $language]
     set lang_path [lindex $langs_path $langnum]
@@ -252,6 +301,18 @@ proc settings_w {  } {
   .settings.cmd insert 0 $cmd
   .settings.cmd_tclsh delete 0 end
   .settings.cmd_tclsh insert 0 $tclsh_cmd
+  button .settings.refresh -text "Refresh" -command { loadconfig
+    .settings.font set $font_family
+    .settings.font configure -values [font families]
+    .settings.fontsize set $font_size
+    .settings.tabw set $file_tabswidth
+    .settings.lang set $language
+    .settings.lang configure -values $langs_names
+    .settings.cmd delete 0 end
+    .settings.cmd insert 0 $cmd
+    .settings.cmd_tclsh delete 0 end
+    .settings.cmd_tclsh insert 0 $tclsh_cmd
+  }
   button .settings.apply -text "Apply" -command { set font_size [.settings.fontsize get]
     set font_family [.settings.font get]
     set file_tabswidth [.settings.tabw get]
@@ -294,6 +355,7 @@ proc settings_w {  } {
   pack .settings.cmd_tclsh_i
   pack .settings.cmd_tclsh
   pack .settings.apply
+  #pack .settings.refresh
 }
 proc runinfo {  } {
   global filename
@@ -341,10 +403,10 @@ proc run_f {  } {
   }
 }
 proc consoleshow_w {  } {
-  global cmd
+  global tclsh_cmd
   global tclfile_path
-  puts [regsub "<f>" $cmd "tkcon.tcl"]
-  set console [open |[regsub "<f>" $cmd "$tclfile_path/tkcon.tcl"]]
+  puts [regsub "<f>" $tclsh_cmd "tkcon.tcl"]
+  set console [open |[regsub "<f>" $tclsh_cmd "$tclfile_path/tkcon.tcl"]]
 }
 proc replace {  } {
   global .pan.mainf.textf.st
@@ -424,6 +486,7 @@ proc highlight {  } {
   global langpath
   set highlight_o [open "$langpath/highlight.tcl" "r"]
   set highlight_script [read $highlight_o]
+  close $highlight_o
   eval $highlight_script
 }
 ######################################################################## FUNCTIONS END #############################################################################
@@ -458,7 +521,7 @@ menu .mb.tools -tearoff 0
 .mb.tools add separator
 .mb.tools add command -label "Run           F5" -command { run_f }
 .mb.tools add separator
-.mb.tools add command -label "Show TkCon" -command { consoleshow_w }
+.mb.tools add command -label "Show Console" -command { consoleshow_w }
 .mb add cascade -label "Tools" -menu .mb.tools
 menu .mb.about -tearoff 0
 .mb.about add command -label "About" -command { about_w }
@@ -511,4 +574,5 @@ bind . <Control-f> {  search  }
 bind . <Control-h> {  replace  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
+
 

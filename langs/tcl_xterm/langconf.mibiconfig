@@ -1,0 +1,3 @@
+TclXterm
+wish <f>
+xterm -e tclsh
