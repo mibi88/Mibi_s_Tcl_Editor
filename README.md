@@ -35,7 +35,7 @@ Screenshot of `v.0.5b1`
 To run Mibi's Tcl Editor, perform these following tasks :
 * Clone this repository
 * If Tcl 8.6 and Tk 8 are not installed, install these softwares.
-* Add a copy of Tkcon 2.5 (only the `tkcon.tcl` file) that you can get [here](https://sourceforge.net/projects/tkcon/)
+* Add a copy of Tkcon 2.5 (only the `tkcon.tcl` file) in at `./langs/tcl` that you can get [here](https://sourceforge.net/projects/tkcon/)
 * Check that `tklib`'s `ctext` is installed
 * Run `index.tcl`
 
