@@ -2,7 +2,8 @@
 
 ## v15 (v.0.5)
 
-* Add support for multiple languages.
-* Clean code.
-* Fix small bugs.
-* move config files in a `./config` dir
+[x] Add support for multiple languages.
+( ] Clean code.
+[x] Fix small bugs.
+[x] move config files in a `./data` dir.
+[ ] Working "Refresh" button.
