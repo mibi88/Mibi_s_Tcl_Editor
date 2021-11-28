@@ -8,4 +8,3 @@
 ::ctext::addHighlightClassForRegexp .pan.mainf.textf.st comments gray {#[^\n\r]*}
 
 
-

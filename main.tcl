@@ -11,6 +11,20 @@
 ## o Tcl 8.6                        ##
 ## o Tk  8.6                        ##
 ## o ctext 3.2                      ##
+## -------------------------------- ##
+######################################
+
+######################################
+## Variables :                      ##
+## o tclfile_path -> Language       ##
+##   configuration file.            ##
+## o fontconfig_path -> Text box    ##
+##   font and tabs width            ##
+##   configuration file.            ##
+## o font_o -> fontconfig_path file ##
+##   object.                        ##
+## o font-data -> Content of font   ##
+##   configuration file.            ##
 ######################################
 
 package require Tcl 8.6
@@ -342,20 +356,20 @@ proc settings_w {  } {
     highlight
     update idletasks
     .pan.mainf.textf.st highlight 1.0 end }
-  pack .settings.font_i
-  pack .settings.font
-  pack .settings.fontsize_i
-  pack .settings.fontsize
-  pack .settings.tabw_i
-  pack .settings.tabw
-  pack .settings.lang_i
-  pack .settings.lang
-  pack .settings.cmd_i
-  pack .settings.cmd
-  pack .settings.cmd_tclsh_i
-  pack .settings.cmd_tclsh
-  pack .settings.apply
-  #pack .settings.refresh
+  pack .settings.font_i -fill x -expand true
+  pack .settings.font -fill x -expand true
+  pack .settings.fontsize_i -fill x -expand true
+  pack .settings.fontsize -fill x -expand true
+  pack .settings.tabw_i -fill x -expand true
+  pack .settings.tabw -fill x -expand true
+  pack .settings.lang_i -fill x -expand true
+  pack .settings.lang -fill x -expand true
+  pack .settings.cmd_i -fill x -expand true
+  pack .settings.cmd -fill x -expand true
+  pack .settings.cmd_tclsh_i -fill x -expand true
+  pack .settings.cmd_tclsh -fill x -expand true
+  pack .settings.apply -fill x -expand true
+  pack .settings.refresh -fill x -expand true
 }
 proc runinfo {  } {
   global filename
@@ -423,11 +437,11 @@ proc replace {  } {
     set text_a [regsub $org $text $new]
     .pan.mainf.textf.st delete 1.0 end
     .pan.mainf.textf.st insert end $text_a }
-  pack .replace.orgstr_i
-  pack .replace.orgstr
-  pack .replace.newstr_i
-  pack .replace.newstr
-  pack .replace.replaceb
+  pack .replace.orgstr_i -fill x -expand true
+  pack .replace.orgstr -fill x -expand true
+  pack .replace.newstr_i -fill x -expand true
+  pack .replace.newstr -fill x -expand true
+  pack .replace.replaceb -fill x -expand true
 }
 proc search {  } {
   global .pan.mainf.textf.st
@@ -444,9 +458,9 @@ proc search {  } {
     set index $position+${n}c
     .pan.mainf.textf.st tag add thing $position $position+${n}c
     .pan.mainf.textf.st tag configure thing -background yellow }
-  pack .search.str_i
-  pack .search.str
-  pack .search.searchb
+  pack .search.str_i -fill x -expand true
+  pack .search.str -fill x -expand true
+  pack .search.searchb -fill x -expand true
 }
 proc removesearchhighlight {  } {
   .pan.mainf.textf.st tag remove thing 1.0 end
@@ -479,9 +493,10 @@ proc paste_t {  } {
 ####### SYNTAX HIGHLIGHTING #######
 proc removehighlight {  } {
   set highlightclasses [::ctext::getHighlightClasses .pan.mainf.textf.st]
-  puts $highlightclasses
+  puts "(Info) Removing highlight classes : $highlightclasses"
   ::ctext::clearHighlightClasses .pan.mainf.textf.st
 }
+###################################
 proc highlight {  } {
   global langpath
   set highlight_o [open "$langpath/highlight.tcl" "r"]
@@ -537,18 +552,22 @@ pack .pan.mainf.textf -fill both -expand yes -side left
 pack .pan.mainf.textf.st -fill both -expand yes
 pack .pan.mainf.scroll -fill y -side left
 pack .pan.mainf.textf.scrollh -fill x
-# syntax hightlighting
+# syntax hightlighting #
 highlight
-####
+########################
 
+#### Output text box ####
 frame .pan.outf
-text .pan.outf.out -wrap word  -tabs $tabswidth -state disabled -yscrollcommand { .pan.outf.outscroll set }
+text .pan.outf.out -wrap word  -tabs $tabswidth -state disabled -yscrollcommand { .pan.outf.outscroll set } -font textboxfont
 scrollbar .pan.outf.outscroll -orient vertical -command { .pan.outf.out yview } -width 8
 .pan add .pan.mainf
 .pan add .pan.outf
 pack .pan -fill both -expand true
 pack .pan.outf.out -expand true -fill both -side left
 pack .pan.outf.outscroll -fill y -side left
+#########################
+
+###### Input menu ######
 frame .pan.input
 entry .pan.input.entry
 button .pan.input.enterb -text ">>>" -command { if { $chan != "none"} {
@@ -561,6 +580,7 @@ button .pan.input.enterb -text ">>>" -command { if { $chan != "none"} {
 pack .pan.input.entry -fill x -side left
 pack .pan.input.enterb -side left
 .pan add .pan.input
+########################
 
 #=====================
 bind .pan.mainf.textf.st <<Modified>> {  textismodified  }
@@ -574,5 +594,8 @@ bind . <Control-f> {  search  }
 bind . <Control-h> {  replace  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
+# wm iconbitmap . "icon.png"
+
+
 
 
