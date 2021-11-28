@@ -40,3 +40,7 @@ To run Mibi's Tcl Editor, perform these following tasks :
 * Run `index.tcl`
 
 And you're ready !
+
+## Troubleshooting
+
+* The "Refresh" Button in buggy. **The "Refresh" Button is not working everywhere, but the bug is due to Tcl.**
