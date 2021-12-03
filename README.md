@@ -30,6 +30,9 @@ Screenshot of `v.0.4` on Ubuntu Unity 20.04.
 ![Mibi's Tcl Editor in action ! (v.0.5b1)](screenshot4.png)
 Screenshot of `v.0.5b1` on Fedora 33.
 
+![Mibi's Tcl Editor in action ! (v.0.5)](screenshot5.png)
+Screenshot of `v.0.5` on Fedora 35.
+
 ---
 ## Run
 To run Mibi's Tcl Editor, perform these following tasks :
