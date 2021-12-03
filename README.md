@@ -19,16 +19,16 @@ Mibi's Tcl Editor --- A small IDE to write Tcl code.
 ## Screenshots
 ---
 ![Mibi's Tcl Editor in action ! (v.0.1.6)](screenshot.png)
-Screenshot of `v.0.1.6`
+Screenshot of `v.0.1.6` on Ubuntu Unity 20.04.
 
 ![Mibi's Tcl Editor in action ! (v.0.3)](screenshot2.png)
-Screenshot of `v.0.3`
+Screenshot of `v.0.3` on Ubuntu Unity 20.04.
 
 ![Mibi's Tcl Editor in action ! (v.0.4)](screenshot3.png)
-Screenshot of `v.0.4`
+Screenshot of `v.0.4` on Ubuntu Unity 20.04.
 
-![Mibi's Tcl Editor in action ! (v.0.4)](screenshot4.png)
-Screenshot of `v.0.5b1`
+![Mibi's Tcl Editor in action ! (v.0.5b1)](screenshot4.png)
+Screenshot of `v.0.5b1` on Fedora 33.
 
 ---
 ## Run
