@@ -36,11 +36,11 @@ Screenshot of `v.0.5` on Fedora 35.
 ---
 ## Run
 To run Mibi's Tcl Editor, perform these following tasks :
-* Clone this repository
+* Clone this repository.
 * If Tcl 8.6 and Tk 8 are not installed, install these softwares.
-* Add a copy of Tkcon 2.5 (only the `tkcon.tcl` file) in at `./langs/tcl` that you can get [here](https://sourceforge.net/projects/tkcon/)
-* Check that `tklib`'s `ctext` is installed
-* Run `index.tcl`
+* Add a copy of Tkcon 2.5 (only the `tkcon.tcl` file) in at `./langs/tcl` that you can get [here](https://sourceforge.net/projects/tkcon/).
+* Check that `tklib`'s `ctext` is installed.
+* Run `index.tcl`.
 
 And you're ready !
 
