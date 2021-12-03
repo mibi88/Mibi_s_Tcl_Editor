@@ -1,4 +1,4 @@
-#!/usr/bin/wish
+#! /usr/bin/wish
 
 ######################################
 ## Mibi's Tcl Editor                ##
@@ -12,6 +12,7 @@
 ## o Tk  8.6                        ##
 ## o ctext 3.2                      ##
 ## -------------------------------- ##
+## License : GNU GPL v2             ##
 ######################################
 
 ######################################
@@ -74,7 +75,7 @@ proc loadconfig {  } {
   set font_o [open $fontconfig_path r]
   set font_data [read $font_o]
   close $font_o
-  puts "Font config : $font_data at $fontconfig_path"
+  puts "(Info) Font config : $font_data at $fontconfig_path"
   set font_data_list [split $font_data "\n"]
   set font_family [lindex $font_data_list 0]
   set font_size [lindex $font_data_list 1]
@@ -96,7 +97,7 @@ proc loadconfig {  } {
   # }
   set langs [glob -directory "$tclfile_path/langs" -type d *]
   #puts $langs
-  puts "LANGS"
+  puts "----- LANGS -----"
   set cmdconfig_path ""
   set langpath ""
   set langs_names {}
@@ -115,7 +116,7 @@ proc loadconfig {  } {
     set langs_names [concat $langs_names $langname]
     set langs_path [concat $langs_path $i]
   }
-  puts "LANGS DATA"
+  puts "----- LANGS DATA -----"
   puts $langs_names
   puts $langs_path
   ########### MAIN CONFIG END ################
@@ -130,9 +131,9 @@ proc loadconfig {  } {
   set filename "None"
   set saved 1
   set index 1.0
-  puts $font_family
-  puts $font_size
-  puts $file_tabswidth
+  puts "(Info) Font family : $font_family"
+  puts "(Info) Font family : $font_size"
+  puts "(Info) Tabs width : $file_tabswidth"
 }
 loadconfig
 ######################################################################## FUNCTIONS START ###########################################################################
@@ -153,7 +154,7 @@ proc askabort {  } {
   }
 }
 proc new_f {  } {
-  puts "New file"
+  puts "(Info) New file."
   if { [askabort] == true} {
     global saved
     global filename
@@ -165,7 +166,7 @@ proc new_f {  } {
 }
 
 proc open_f {  } {
-  puts "Open"
+  puts "(Info) Open."
   global filename
   global saved
   set filetypes {
@@ -192,7 +193,7 @@ proc open_f {  } {
   }
 }
 proc save_f {  } {
-  puts "Save"
+  puts "(Info) Save."
   global filename
   global saved
   if { $filename != "None" } {
@@ -206,7 +207,7 @@ proc save_f {  } {
   }
 }
 proc saveas_f {  } {
-  puts "Save as"
+  puts "(Info) Save as."
   global filename
   global saved
   set filetypes {
@@ -285,7 +286,7 @@ proc settings_w {  } {
   label .settings.fontsize_i -text "Font size :"
   spinbox .settings.fontsize -from 9 -to 96 -state readonly
   .settings.fontsize set $font_size
-  label .settings.tabw_i -text "Tab width (c) :"
+  label .settings.tabw_i -text "Tab width\n(1 = tabs will be shown with\na width of 4 spaces) :"
   spinbox .settings.tabw -from 1 -to 12 -state readonly
   .settings.tabw set $file_tabswidth
   label .settings.lang_i -text "Programming language :"
@@ -352,9 +353,8 @@ proc settings_w {  } {
     puts $cmd_o $cmd
     puts $cmd_o $tclsh_cmd
     close $cmd_o
-    removehighlight
-    highlight
-    update idletasks
+    removehighlight_c
+    highlight_c
     .pan.mainf.textf.st highlight 1.0 end }
   pack .settings.font_i -fill x -expand true
   pack .settings.font -fill x -expand true
@@ -379,6 +379,7 @@ proc runinfo {  } {
   return $strinfo
 }
 proc run_f {  } {
+  puts "(Info) Running file."
   global saved
   global filename
   global tclfile_path
@@ -481,8 +482,9 @@ proc cut_t {  } {
   }
 }
 proc paste_t {  } {
+  puts "(Info) Paste."
   if {[catch {clipboard get} contents]} {
-    puts "error"
+    puts "(Error) Error when trying to get the content of the clipboard."
   } else {
     selection own
     set text [clipboard get]
@@ -491,19 +493,23 @@ proc paste_t {  } {
   }
 }
 ####### SYNTAX HIGHLIGHTING #######
-proc removehighlight {  } {
+proc removehighlight_c {  } {
   set highlightclasses [::ctext::getHighlightClasses .pan.mainf.textf.st]
   puts "(Info) Removing highlight classes : $highlightclasses"
   ::ctext::clearHighlightClasses .pan.mainf.textf.st
+  .pan.mainf.textf.st highlight 1.0 end
+  update idletasks
 }
-###################################
-proc highlight {  } {
+proc highlight_c {  } {
   global langpath
   set highlight_o [open "$langpath/highlight.tcl" "r"]
   set highlight_script [read $highlight_o]
   close $highlight_o
   eval $highlight_script
+  .pan.mainf.textf.st highlight 1.0 end
+  update idletasks
 }
+###################################
 ######################################################################## FUNCTIONS END #############################################################################
 settitle
 panedwindow .pan -orient vertical -showhandle 1 -sashwidth 3 -sashrelief groove
@@ -534,6 +540,9 @@ menu .mb.edit -tearoff 0
 menu .mb.tools -tearoff 0
 .mb.tools add command -label "Settings" -command { settings_w }
 .mb.tools add separator
+.mb.tools add command -label "Highlight code" -command { highlight_c }
+.mb.tools add command -label "Remove syntax highlighting" -command { removehighlight_c }
+.mb.tools add separator
 .mb.tools add command -label "Run           F5" -command { run_f }
 .mb.tools add separator
 .mb.tools add command -label "Show Console" -command { consoleshow_w }
@@ -553,7 +562,7 @@ pack .pan.mainf.textf.st -fill both -expand yes
 pack .pan.mainf.scroll -fill y -side left
 pack .pan.mainf.textf.scrollh -fill x
 # syntax hightlighting #
-highlight
+highlight_c
 ########################
 
 #### Output text box ####
@@ -577,11 +586,12 @@ button .pan.input.enterb -text ">>>" -command { if { $chan != "none"} {
   .pan.outf.out configure -state normal
   .pan.outf.out insert end [gets $chan]
   .pan.outf.out configure -state disabled }
-pack .pan.input.entry -fill x -side left
-pack .pan.input.enterb -side left
+pack .pan.input.entry -fill both -side left
+pack .pan.input.enterb -side left -fill y
 .pan add .pan.input
 ########################
-
+image create photo icon -file "$tclfile_path/icon.png"
+wm iconphoto . icon
 #=====================
 bind .pan.mainf.textf.st <<Modified>> {  textismodified  }
 bind . <Control-s> {  save_f  }
@@ -594,8 +604,3 @@ bind . <Control-f> {  search  }
 bind . <Control-h> {  replace  }
 
 wm protocol . WM_DELETE_WINDOW { quit_w }
-# wm iconbitmap . "icon.png"
-
-
-
-
